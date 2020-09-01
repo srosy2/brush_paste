@@ -6,6 +6,7 @@ class PredictTarget:
 
     def predict(self, X):
         self.target = self.model.predict(X)
+        self.inverse_transform_target()
 
     def inverse_transform_target(self):
         self.target = self.target.replace({1: 0, 0: 1})

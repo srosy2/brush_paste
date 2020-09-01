@@ -1,9 +1,7 @@
+import pickle
+
+
 class Model:
-    def __init__(self, model):
-        self.model = model
-
-    def fit(self, X, y):
-        self.model.fit(X, y)
-
-    def predict(self, X):
-        return self.model.predict(X)
+    def __init__(self, model, encoder):
+        self.predict_model = pickle.load(open(model, 'rb'))
+        self.encoder = pickle.load(open(encoder, 'rb'))

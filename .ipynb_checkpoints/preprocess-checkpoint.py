@@ -1,12 +1,11 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
 
 class PreprocessData:
     def __init__(self, df):
         self.df = df
-        self.create_new_columns()
-        self.drop_unnec_col()
 
     def create_new_columns(self):
         self.df['New_SKU'] = self.df['Формат'] + '_' + self.df['SKU']
@@ -113,8 +112,6 @@ class CreateNewData:
     def __init__(self, df):
         self.df = df
         self.new_df = pd.DataFrame([])
-        self.create_data()
-        self.fill_new_data()
 
     def create_data(self):
         df_columns = ['products', 'difference_products', 'all_price', 'difference_all_price',
@@ -150,3 +147,18 @@ class CreateNewData:
                 lambda x: find_min_quantites(x.values[:-1] - x.values[1:]), axis=1)
         self.new_df.loc[:, self.new_df.columns[48]] = table.apply(lambda x: find_quantity_month(x), axis=1)
 
+
+class PreprocessTarget:
+    def __init__(self, df, target):
+        self.transform_model = LabelEncoder()
+        self.df = df
+        self.target = target
+
+    def transform_target(self):
+        self.transform_model.fit(self.target)
+        self.target = self.transform_model.transform(self.df['АМ/in-outs'])
+        self.target = pd.Series(pd.concat([self.df, pd.Series(self.target, name='target', index=self.df.index)], axis=1) \
+                                    [['New_SKU', 'target']].drop_duplicates().sort_values(by='New_SKU')['target'],
+                                name='target')
+        self.target = self.target.replace({2: 1})
+        self.target = self.target.replace({1: 0, 0: 1})
