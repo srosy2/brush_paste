@@ -1,0 +1,10 @@
+model:
+    LGBMClassifier(boosting_type='dart',class_weight={1:25, 0:1}, 
+    learning_rate=0.4, max_depth=5, n_estimators=175, num_leaves=10)
+target:
+    0: 'AM'
+    1: 'In-out'
+Encoder:
+    'In-out': 0
+    'AM': 1
+    'AM(выход)': 2
