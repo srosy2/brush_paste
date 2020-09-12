@@ -20,9 +20,7 @@ class PreprocessData:
 
 
 def find_difference_right(value):  # find how many times max value more than min value after max value
-    value = list(value)
-    while 0 in value:
-        value.remove(0)
+    value = list(filter(lambda x: x != 0, value))
     value = value[::-1]
     number = int(np.argmax(value))
     min_value = value[0]
@@ -33,9 +31,7 @@ def find_difference_right(value):  # find how many times max value more than min
 
 
 def find_min_quantites(value):  # find quantity of local min
-    value = list(value)
-    while 0 in value:
-        value.remove(0)
+    value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     counter = 0
     for i in range(1, len_time - 1):
@@ -44,10 +40,8 @@ def find_min_quantites(value):  # find quantity of local min
     return counter
 
 
-def find_max_quantites(value): # find quantity of local max
-    value = list(value)
-    while 0 in value:
-        value.remove(0)
+def find_max_quantites(value):  # find quantity of local max
+    value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     counter = 0
     for i in range(1, len_time - 1):
@@ -57,9 +51,7 @@ def find_max_quantites(value): # find quantity of local max
 
 
 def find_difference_left(value):  # find how many times max value more than min value before max value
-    value = list(value)
-    while 0 in value:
-        value.remove(0)
+    value = list(filter(lambda x: x != 0, value))
     number = int(np.argmax(value))
     min_value = value[0]
     for i in range(number):
@@ -69,9 +61,7 @@ def find_difference_left(value):  # find how many times max value more than min 
 
 
 def find_min(value):  # find quantity of global min
-    value = list(value)
-    while 0 in value:
-        value.remove(0)
+    value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     back_value = value[::-1]
     min_value = back_value[0]
@@ -84,9 +74,7 @@ def find_min(value):  # find quantity of global min
 
 
 def find_max(value):  # find quantity of global max
-    value = list(value)
-    while 0 in value:
-        value.remove(0)
+    value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     max_value = value[0]
     counter = 0
@@ -97,11 +85,9 @@ def find_max(value):  # find quantity of global max
     return counter
 
 
-def find_quantity_month(values):  # find quantity of month where was selling something
-    a = list(values)
-    while 0 in a:
-        a.remove(0)
-    return len(a)
+def find_quantity_month(value):  # find quantity of month where was selling something
+    value = list(filter(lambda x: x != 0, value))
+    return len(value)
 
 
 class CreateNewData:
