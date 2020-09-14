@@ -11,4 +11,4 @@ if __name__ == '__main__':
                   'models/encoder.pickle')  # loading trained models
     prediction = PredictTarget(model.predict_model, model.encoder)  # create model for prediction
     prediction.predict(new_data.new_df)  # predict
-    prediction.target.to_excel('prediction.xlsx')
+    pd.concat((new_data.new_df, prediction.target), axis=1).to_csv('prediction.csv')
