@@ -94,39 +94,32 @@ class CreateNewData:
     def __init__(self, df):
         self.df = df
         self.new_df = pd.DataFrame([])
+        self.df_columns = ['products',  'all_price', 'shops',  'price', 'difference_products',
+                           'difference_all_price', 'difference_shops', 'difference_price']
+        self.function_columns = ['global_max', 'global_min', 'difference_left', 'difference_right',
+                                 'local_min', 'local_max']
+        self.functions = [find_max, find_max_quantites, find_difference_right, find_min,
+                          find_difference_left, find_min_quantites, find_quantity_month]
         self.create_data()
         self.fill_new_data()
 
     def create_data(self):  # create new pandas DataFrame with new features
-        df_columns = ['products', 'difference_products', 'all_price', 'difference_all_price',
-                      'shops', 'difference_shops', 'price', 'difference_price']
-        function_columns = ['global_max', 'global_min', 'difference_left', 'difference_right', 'local_min', 'local_max']
-        all_columns = [i + '_' + j for i in function_columns for j in df_columns] + ['month']
+        all_columns = [j + '_' + i for i in self.df_columns for j in self.function_columns] + ['month']
         all_SKU = sorted(list(set(self.df['Format_SKU'])))
         self.new_df = pd.DataFrame(data=np.zeros((len(all_SKU), len(all_columns))), index=all_SKU, columns=all_columns)
 
     def fill_new_data(self):  # fill new pandas DataFrame by using our functions
         global table
-        for i in range(0, 8, 2):
-            table = pd.pivot_table(self.df, values=self.df.columns.values[int(1 + i / 2)], index=['Format_SKU'],
+        for i in range(len(self.df.columns.values[1:-1])):  # goes through Кол-во уп, Сумма, Кол-во магазинов, цена
+            table = pd.pivot_table(self.df, values=self.df.columns.values[1:-1][i], index=['Format_SKU'],
                                    columns=['Месяц'], fill_value=0)
-            self.new_df.loc[:, self.new_df.columns[i]] = table.apply(lambda x: find_max(x), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 1]] = table.apply(
-                lambda x: find_max(x.values[:-1] - x.values[1:]),
-                axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 8]] = table.apply(lambda x: find_max_quantites(x), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 9]] = table.apply(
-                lambda x: find_max_quantites(x.values[:-1] - x.values[1:]), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 16]] = table.apply(lambda x: find_difference_right(x), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 17]] = table.apply(
-                lambda x: find_difference_right(x.values[:-1] - x.values[1:]), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 24]] = table.apply(lambda x: find_min(x), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 25]] = table.apply(
-                lambda x: find_min(x.values[:-1] - x.values[1:]), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 32]] = table.apply(lambda x: find_difference_left(x), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 33]] = table.apply(
-                lambda x: find_difference_left(x.values[:-1] - x.values[1:]), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 40]] = table.apply(lambda x: find_min_quantites(x), axis=1)
-            self.new_df.loc[:, self.new_df.columns[i + 41]] = table.apply(
-                lambda x: find_min_quantites(x.values[:-1] - x.values[1:]), axis=1)
-        self.new_df.loc[:, self.new_df.columns[48]] = table.apply(lambda x: find_quantity_month(x), axis=1)
+            for j in range(len(self.functions[:-1])):  # goes through previous columns
+                number_column = i * (len(self.functions[:-1])) + j
+                self.new_df.loc[:, self.new_df.columns[number_column]] = table.apply(lambda x: self.functions[j](x),
+                                                                                     axis=1)
+            for d in range(len(self.functions[:-1])):  #
+                number_column = (len(self.functions[:-1])) * (len(self.df.columns.values[1:-1])) + d \
+                                + i * (len(self.functions[:-1]))
+                self.new_df.loc[:, self.new_df.columns[number_column + 1]] = table.apply(
+                    lambda x: self.functions[j](x.values[:-1] - x.values[1:]), axis=1)
+        self.new_df.loc[:, self.new_df.columns[-1]] = table.apply(lambda x: self.functions[-1](x), axis=1)
