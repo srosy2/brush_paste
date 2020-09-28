@@ -2,6 +2,9 @@ import pandas as pd
 
 
 class PredictTarget:
+    """
+    predict target and probability of target
+    """
     def __init__(self, model, encoder):
         self.model = model
         self.target = []

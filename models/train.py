@@ -1,22 +1,29 @@
 import pandas as pd
-import numpy as np
 from sklearn.preprocessing import LabelEncoder
-import pickle
 from sklearn.model_selection import cross_val_score
 from lightgbm import LGBMClassifier
 from bayes_opt import BayesianOptimization
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, make_scorer
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 import mlflow
 import warnings
+
 warnings.filterwarnings("ignore")
+
+"""
+I use bayesian optimization for training models, ..._pounds to set range of optimization parameters,
+ML Flow for model tracking.
+Use f1_score for model optimization 
+"""
 
 
 class Trainer:
     def __init__(self):
+        """
+        load data and set range of optimization parameters
+        """
+
         self.data = pd.read_csv('../Data/train/DataTrain.csv')
         self.target = pd.read_csv('../Data/train/TargetTrain.csv')
         self.lgbm_pounds = {"n_estimators": (50, 350), "boosting_type": (0, 2),
@@ -41,11 +48,22 @@ class Trainer:
         self.best_model = []
 
     def train_encoder(self):
+        """
+        encode AM/In-out to 0/1
+        """
         lb = LabelEncoder()
         lb.fit(self.target)
         self.target = pd.Series(lb.transform(self.target)).replace({0: 1, 1: 0})
 
     def train_model(self):
+
+        """"
+        LGBMClassifier, XGBClassifier, CatBoostClassifier is optimized by using BayesianOptimization
+
+        tracking all in 'predict In_out/AM' experiment
+        type mlflow ui in terminal to check
+        """
+
         optimizer_lgbm = BayesianOptimization(
             f=self.lgbm_cv,
             pbounds=self.lgbm_pounds,

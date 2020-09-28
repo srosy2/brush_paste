@@ -3,6 +3,10 @@ import numpy as np
 
 
 class PreprocessData:
+    """"
+    Preprocess data for feature extraction: add new columns цена = сумма/кол-во уп and Format_SKU = 'Формат'+'SKU',
+    drop 'Brand', 'Категория', 'Формат', 'SKU'
+    """
     def __init__(self, df):
         self.df = df
         self.create_new_columns()
@@ -60,7 +64,7 @@ def find_difference_left(value):  # find how many times max value more than min 
     return value[number] / min_value
 
 
-def find_min(value):  # find quantity of global min
+def find_min(value):  # find quantity of changing the smallest value from right to left
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     back_value = value[::-1]
@@ -73,7 +77,7 @@ def find_min(value):  # find quantity of global min
     return counter
 
 
-def find_max(value):  # find quantity of global max
+def find_max(value):  # find quantity of changing the biggest value from left to right
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     max_value = value[0]
@@ -91,6 +95,11 @@ def find_quantity_month(value):  # find quantity of month where was selling some
 
 
 class CreateNewData:
+    """
+    Create new pandas DataFrame with Формат_SKU index and new features. New features was created by using function to
+    each Формат_SKU
+    """
+
     def __init__(self, df):
         self.df = df
         self.new_df = pd.DataFrame([])
