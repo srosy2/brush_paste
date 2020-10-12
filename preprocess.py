@@ -118,7 +118,7 @@ class CreateNewData:
         self.new_df = pd.DataFrame(data=np.zeros((len(all_SKU), len(all_columns))), index=all_SKU, columns=all_columns)
 
     def fill_new_data(self):  # fill new pandas DataFrame by using our functions
-        global table
+        table = []
         for i in range(len(self.df.columns.values[1:-1])):  # goes through Кол-во уп, Сумма, Кол-во магазинов, цена
             table = pd.pivot_table(self.df, values=self.df.columns.values[1:-1][i], index=['Format_SKU'],
                                    columns=['Месяц'], fill_value=0)
