@@ -7,6 +7,7 @@ class PreprocessData:
     Preprocess data for feature extraction: add new columns цена = сумма/кол-во уп and Format_SKU = 'Формат'+'SKU',
     drop 'Brand', 'Категория', 'Формат', 'SKU'
     """
+
     def __init__(self, df):
         self.df = df
         self.create_new_columns()
@@ -68,24 +69,14 @@ def find_min(value):  # find quantity of changing the smallest value from right 
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     back_value = value[::-1]
-    min_value = back_value[0]
-    counter = 0
-    for i in range(len_time - 1):
-        if min_value > back_value[i + 1]:
-            counter += 1
-            min_value = back_value[i + 1]
+    counter = len([x for x in range(1, len_time + 1) if np.argmin(back_value[:x]) == (x - 1)]) - 1
     return counter
 
 
 def find_max(value):  # find quantity of changing the biggest value from left to right
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
-    max_value = value[0]
-    counter = 0
-    for i in range(len_time - 1):
-        if max_value < value[i + 1]:
-            counter += 1
-            max_value = value[i + 1]
+    counter = len([x for x in range(1, len_time + 1) if np.argmax(value[:x]) == (x-1)]) - 1
     return counter
 
 
@@ -103,7 +94,7 @@ class CreateNewData:
     def __init__(self, df):
         self.df = df
         self.new_df = pd.DataFrame([])
-        self.df_columns = ['products',  'all_price', 'shops',  'price', 'difference_products',
+        self.df_columns = ['products', 'all_price', 'shops', 'price', 'difference_products',
                            'difference_all_price', 'difference_shops', 'difference_price']
         self.function_columns = ['global_max', 'global_min', 'difference_left', 'difference_right',
                                  'local_min', 'local_max']
