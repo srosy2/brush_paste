@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from typing import List
 
 
 class PreprocessData:
@@ -9,7 +10,7 @@ class PreprocessData:
     """
 
     def __init__(self, df):
-        self.df = df
+        self.df: pd.DataFrame = df
         self.create_new_columns()
         self.drop_unnec_col()
 
@@ -24,7 +25,8 @@ class PreprocessData:
         self.df = self.df.drop(unnecessary, axis=1)
 
 
-def find_difference_right(value):  # find how many times max value more than min value after max value
+def find_difference_right(value: List[float]) -> float:  # find how many times max value more than min value after
+    #                                                       max value
     value = list(filter(lambda x: x != 0, value))
     value = value[::-1]
     number = int(np.argmax(value))
@@ -35,7 +37,7 @@ def find_difference_right(value):  # find how many times max value more than min
     return value[number] / min_value
 
 
-def find_min_quantites(value):  # find quantity of local min
+def find_min_quantites(value: List[float]) -> int:  # find quantity of local min
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     counter = 0
@@ -45,7 +47,7 @@ def find_min_quantites(value):  # find quantity of local min
     return counter
 
 
-def find_max_quantites(value):  # find quantity of local max
+def find_max_quantites(value: List[float]) -> int:  # find quantity of local max
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     counter = 0
@@ -55,7 +57,8 @@ def find_max_quantites(value):  # find quantity of local max
     return counter
 
 
-def find_difference_left(value):  # find how many times max value more than min value before max value
+def find_difference_left(value: List[float]) -> float:  # find how many times max value more than min value before
+    #                                                      max value
     value = list(filter(lambda x: x != 0, value))
     number = int(np.argmax(value))
     min_value = value[0]
@@ -65,7 +68,7 @@ def find_difference_left(value):  # find how many times max value more than min 
     return value[number] / min_value
 
 
-def find_min(value):  # find quantity of changing the smallest value from right to left
+def find_min(value: List[float]) -> int:  # find quantity of changing the smallest value from right to left
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
     back_value = value[::-1]
@@ -73,14 +76,14 @@ def find_min(value):  # find quantity of changing the smallest value from right 
     return counter
 
 
-def find_max(value):  # find quantity of changing the biggest value from left to right
+def find_max(value: List[float]) -> int:  # find quantity of changing the biggest value from left to right
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
-    counter = len([x for x in range(1, len_time + 1) if np.argmax(value[:x]) == (x-1)]) - 1
+    counter = len([x for x in range(1, len_time + 1) if np.argmax(value[:x]) == (x - 1)]) - 1
     return counter
 
 
-def find_quantity_month(value):  # find quantity of month where was selling something
+def find_quantity_month(value: List[float]) -> int:  # find quantity of month where was selling something
     value = list(filter(lambda x: x != 0, value))
     return len(value)
 
@@ -92,12 +95,12 @@ class CreateNewData:
     """
 
     def __init__(self, df):
-        self.df = df
+        self.df: pd.DataFrame = df
         self.new_df = pd.DataFrame([])
-        self.df_columns = ['products', 'all_price', 'shops', 'price', 'difference_products',
-                           'difference_all_price', 'difference_shops', 'difference_price']
-        self.function_columns = ['global_max', 'global_min', 'difference_left', 'difference_right',
-                                 'local_min', 'local_max']
+        self.df_columns: List[str] = ['products', 'all_price', 'shops', 'price', 'difference_products',
+                                      'difference_all_price', 'difference_shops', 'difference_price']
+        self.function_columns: List[str] = ['global_max', 'global_min', 'difference_left', 'difference_right',
+                                            'local_min', 'local_max']
         self.functions = [find_max, find_max_quantites, find_difference_right, find_min,
                           find_difference_left, find_min_quantites, find_quantity_month]
         self.create_data()
@@ -117,7 +120,7 @@ class CreateNewData:
                 number_column = i * (len(self.functions[:-1])) + j
                 self.new_df.loc[:, self.new_df.columns[number_column]] = table.apply(lambda x: self.functions[j](x),
                                                                                      axis=1)
-            for d in range(len(self.functions[:-1])):  #
+            for d in range(len(self.functions[:-1])):
                 number_column = (len(self.functions[:-1])) * (len(self.df.columns.values[1:-1])) + d \
                                 + i * (len(self.functions[:-1]))
                 self.new_df.loc[:, self.new_df.columns[number_column + 1]] = table.apply(
