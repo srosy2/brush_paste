@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import List
+from typing import List, Callable
 
 
 class PreprocessData:
@@ -9,8 +9,8 @@ class PreprocessData:
     drop 'Brand', 'Категория', 'Формат', 'SKU'
     """
 
-    def __init__(self, df):
-        self.df: pd.DataFrame = df
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
         self.create_new_columns()
         self.drop_unnec_col()
 
@@ -21,7 +21,7 @@ class PreprocessData:
         self.df = self.df.rename(columns={'Format_SKU': 'цена', 'цена': 'Format_SKU'})
 
     def drop_unnec_col(self):  # drop useless features
-        unnecessary = ['Brand', 'Категория', 'Формат', 'SKU']
+        unnecessary: List[str] = ['Brand', 'Категория', 'Формат', 'SKU']
         self.df = self.df.drop(unnecessary, axis=1)
 
 
@@ -94,21 +94,21 @@ class CreateNewData:
     each Формат_SKU
     """
 
-    def __init__(self, df):
-        self.df: pd.DataFrame = df
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
         self.new_df = pd.DataFrame([])
         self.df_columns: List[str] = ['products', 'all_price', 'shops', 'price', 'difference_products',
                                       'difference_all_price', 'difference_shops', 'difference_price']
         self.function_columns: List[str] = ['global_max', 'global_min', 'difference_left', 'difference_right',
                                             'local_min', 'local_max']
-        self.functions = [find_max, find_max_quantites, find_difference_right, find_min,
-                          find_difference_left, find_min_quantites, find_quantity_month]
+        self.functions: List[Callable] = [find_max, find_max_quantites, find_difference_right, find_min,
+                                          find_difference_left, find_min_quantites, find_quantity_month]
         self.create_data()
         self.fill_new_data()
 
     def create_data(self):  # create new pandas DataFrame with new features
-        all_columns = [j + '_' + i for i in self.df_columns for j in self.function_columns] + ['month']
-        all_SKU = sorted(list(set(self.df['Format_SKU'])))
+        all_columns: List[str] = [j + '_' + i for i in self.df_columns for j in self.function_columns] + ['month']
+        all_SKU: List[str] = sorted(list(set(self.df['Format_SKU'])))
         self.new_df = pd.DataFrame(data=np.zeros((len(all_SKU), len(all_columns))), index=all_SKU, columns=all_columns)
 
     def fill_new_data(self):  # fill new pandas DataFrame by using our functions
