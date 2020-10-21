@@ -3,7 +3,7 @@ from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
-from typing import Any
+from typing import Union
 
 
 class PredictTarget:
@@ -11,7 +11,7 @@ class PredictTarget:
     predict target and probability of target
     """
 
-    def __init__(self, model: Any[LGBMClassifier, XGBClassifier, CatBoostClassifier], encoder: LabelEncoder):
+    def __init__(self, model: Union[LGBMClassifier, XGBClassifier, CatBoostClassifier], encoder: LabelEncoder):
         self.model = model
         self.target = []
         self.encoder = encoder

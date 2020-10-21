@@ -29,43 +29,31 @@ def find_difference_right(value: List[float]) -> float:  # find how many times m
     #                                                       max value
     value = list(filter(lambda x: x != 0, value))
     value = value[::-1]
-    number = int(np.argmax(value))
-    min_value = value[0]
-    for i in range(number):
-        if min_value > value[i]:
-            min_value = value[i]
-    return value[number] / min_value
+    max_number = np.argmax(value)
+    min_number = np.argmin(value[:max_number+1])
+    return value[max_number] / value[min_number]
 
 
 def find_min_quantites(value: List[float]) -> int:  # find quantity of local min
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
-    counter = 0
-    for i in range(1, len_time - 1):
-        if value[i - 1] > value[i] and value[i] < value[i + 1]:
-            counter += 1
+    counter = len([x for x in range(1, len_time - 1) if value[x - 1] > value[x] and value[x] < value[x + 1]])
     return counter
 
 
 def find_max_quantites(value: List[float]) -> int:  # find quantity of local max
     value = list(filter(lambda x: x != 0, value))
     len_time = len(value)
-    counter = 0
-    for i in range(1, len_time - 1):
-        if value[i - 1] < value[i] and value[i] > value[i + 1]:
-            counter += 1
+    counter = len([x for x in range(1, len_time - 1) if value[x - 1] < value[x] and value[x] > value[x + 1]])
     return counter
 
 
 def find_difference_left(value: List[float]) -> float:  # find how many times max value more than min value before
     #                                                      max value
     value = list(filter(lambda x: x != 0, value))
-    number = int(np.argmax(value))
-    min_value = value[0]
-    for i in range(number):
-        if min_value > value[i]:
-            min_value = value[i]
-    return value[number] / min_value
+    max_number = np.argmax(value)
+    min_number = np.argmin(value[:max_number + 1])
+    return value[max_number] / value[min_number]
 
 
 def find_min(value: List[float]) -> int:  # find quantity of changing the smallest value from right to left
