@@ -1,0 +1,30 @@
+wandb: ERROR Attempted to change value of key "i" from binary:logistic to None
+wandb: ERROR If you really want to do this, pass allow_val_change=True to config.update()
+Traceback (most recent call last):
+  File "C:\Python\Python38\lib\site-packages\bayes_opt\target_space.py", line 191, in probe
+    target = self._cache[_hashable(x)]
+KeyError: (0.1915194503788923, 0.6221087710398319, 0.4377277390071145, 0.7853585837137692, 77.99758081188035, 0.2725926052826416, 27.64642551430967, 16.235571373165364, 95.81393536837052, 8.759326347420947, 3.5781726995786665, 13.023883012563008, 0.6834629351721363)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:/Python/Colgate/brush_paste/models/train.py", line 190, in <module>
+    models.train_model()
+  File "C:/Python/Colgate/brush_paste/models/train.py", line 90, in train_model
+    optimizer_xgb.maximize(n_iter=500)
+  File "C:\Python\Python38\lib\site-packages\bayes_opt\bayesian_optimization.py", line 185, in maximize
+    self.probe(x_probe, lazy=False)
+  File "C:\Python\Python38\lib\site-packages\bayes_opt\bayesian_optimization.py", line 116, in probe
+    self._space.probe(params)
+  File "C:\Python\Python38\lib\site-packages\bayes_opt\target_space.py", line 194, in probe
+    target = self.target_func(**params)
+  File "C:/Python/Colgate/brush_paste/models/train.py", line 173, in xgb_cv
+    self.log_par_and_metrics(estim.get_params(), cval.mean(), 'xgb')
+  File "C:/Python/Colgate/brush_paste/models/train.py", line 98, in log_par_and_metrics
+    wandb.config.i = j
+  File "C:\Python\Python38\lib\site-packages\wandb\sdk\wandb_config.py", line 59, in __setitem__
+    key, val = self._sanitize(key, val)
+  File "C:\Python\Python38\lib\site-packages\wandb\sdk\wandb_config.py", line 141, in _sanitize
+    raise config_util.ConfigError(
+wandb.lib.config_util.ConfigError: Attempted to change value of key "i" from binary:logistic to None
+If you really want to do this, pass allow_val_change=True to config.update()

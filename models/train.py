@@ -6,7 +6,7 @@ from bayes_opt import BayesianOptimization
 from sklearn.metrics import f1_score, make_scorer
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
-import mlflow
+import wandb
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -84,15 +84,18 @@ class Trainer:
             random_state=1234,
             verbose=2
         )
-        mlflow.set_experiment(experiment_name='predict In_out/AM')
 
         optimizer_xgb.maximize(n_iter=500)
         optimizer_lgbm.maximize(n_iter=500)
         optimizer_cat.maximize(n_iter=500)
 
-    def log_par_and_metrics(self, params, metric):
-        [mlflow.log_param(i, j) for i, j in zip(params.keys(), params.values())]
-        mlflow.log_metric("f1_score", metric)
+    def log_par_and_metrics(self, params, metric, name):
+        run = wandb.init(project="runs-from-for-loop", reinit=True)
+        wandb.run.name = name
+        for i, j in zip(params.keys(), params.values()):
+            wandb.config[i] = j
+        wandb.log({"f1_score": metric})
+        run.finish()
 
     def lgbm(self, n_estimators, boosting_type, num_leaves, class_weight, learning_rate, subsample_for_bin,
              min_split_gain, min_child_weight, min_child_samples, subsample):
@@ -136,7 +139,6 @@ class Trainer:
             random_strength):
         estimator = CatBoostClassifier(
             n_estimators=int(n_estimators),
-            iterations=200,
             learning_rate=learning_rate,
             depth=int(depth),
             l2_leaf_reg=l2_leaf_reg,
@@ -155,8 +157,7 @@ class Trainer:
         cval = cross_val_score(estim, self.data, self.target,
                                scoring=make_scorer(f1_score), cv=5)
 
-        with mlflow.start_run(run_name='lightgbm'):
-            self.log_par_and_metrics(estim.get_params(), cval.mean())
+        self.log_par_and_metrics(estim.get_params(), cval.mean(), 'lgbm')
 
         return cval.mean()
 
@@ -164,8 +165,7 @@ class Trainer:
         estim = self.xgb(**kwargs)
         cval = cross_val_score(estim, self.data, self.target,
                                scoring=make_scorer(f1_score), cv=5)
-        with mlflow.start_run(run_name='xgboost'):
-            self.log_par_and_metrics(estim.get_params(), cval.mean())
+        self.log_par_and_metrics(estim.get_params(), cval.mean(), 'xgb')
 
         return cval.mean()
 
@@ -173,8 +173,7 @@ class Trainer:
         estim = self.cat(**kwargs)
         cval = cross_val_score(estim, self.data, self.target,
                                scoring=make_scorer(f1_score), cv=5)
-        with mlflow.start_run(run_name='catboost'):
-            self.log_par_and_metrics(estim.get_params(), cval.mean())
+        self.log_par_and_metrics(estim.get_params(), cval.mean(), 'cat')
 
         return cval.mean()
 
