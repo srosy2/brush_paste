@@ -3,7 +3,43 @@ import numpy as np
 from typing import List, Callable
 
 
-class PreprocessData:
+class PreprocessDailyData:
+    """
+        Preprocess data for feature extraction: add new columns цена = сумма/кол-во уп and Format_SKU = 'Формат'+'SKU',
+        drop 'Brand', 'Категория', 'Формат', 'SKU'
+    """
+
+    def __init__(self, df: pd.DataFrame):
+        self.df = df.copy()
+        self.table: pd.DataFrame
+        self.prepare_df()
+        self.create_new_columns()
+        self.drop_unnec_col()
+        self.table = pd.pivot_table(self.df, values='цена', index=['Format_SKU'],
+                                    columns=['День'], fill_value=0).T
+
+    def prepare_df(self):
+        self.df.drop(self.df[self.df['Год'] == 2019].index, inplace=True)
+        self.df.drop(['Год', 'Месяц'], axis=1, inplace=True)
+        date = pd.to_datetime(self.df['День'])
+        self.df['День'] = date.apply(lambda x: x.week * 7 + x.weekday())
+        self.df.rename(
+            columns={'Формат': 'Формат', 'Бренд': 'Brand', 'SKU': 'SKU',
+                     'День': 'День', 'Кол-во уп': 'Кол-во уп', 'Сумма': 'Сумма',
+                     'Кол-во магазинов': 'Кол-во магазинов'}, inplace=True)
+
+    def create_new_columns(self):  # create price and Format_SKU = 'Формат' + 'SKU'
+        self.df['Format_SKU'] = self.df['Формат'] + '_' + self.df['SKU']
+        self.df['цена'] = self.df['Сумма'] / self.df['Кол-во уп']
+        self.df['Format_SKU'], self.df['цена'] = self.df['цена'], self.df['Format_SKU']
+        self.df = self.df.rename(columns={'Format_SKU': 'цена', 'цена': 'Format_SKU'})
+
+    def drop_unnec_col(self):  # drop useless features
+        unnecessary: List[str] = ['Brand', 'Формат', 'SKU']
+        self.df = self.df.drop(unnecessary, axis=1)
+
+
+class PreprocessMonthlyData:
     """"
     Preprocess data for feature extraction: add new columns цена = сумма/кол-во уп and Format_SKU = 'Формат'+'SKU',
     drop 'Brand', 'Категория', 'Формат', 'SKU'
@@ -30,7 +66,7 @@ def find_difference_right(value: List[float]) -> float:  # find how many times m
     value = list(filter(lambda x: x != 0, value))
     value = value[::-1]
     max_number = np.argmax(value)
-    min_number = np.argmin(value[:max_number+1])
+    min_number = np.argmin(value[:max_number + 1])
     return value[max_number] / value[min_number]
 
 
