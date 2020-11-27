@@ -3,15 +3,18 @@ import numpy as np
 
 
 class DetectSegments:
-    def __init__(self, df: pd.DataFrame, window, threshold, EDPL_window):
+    def __init__(self, df: pd.DataFrame, window, threshold, EDPL_window, sales_period, threshold_out):
         self.df = df
         self.window = window
         self.EDPL_window = EDPL_window
+        self.sales_period = sales_period
+        self.threshold_out = threshold_out
         self.threshold = threshold
         self.sales: pd.DataFrame
         self.EDPL: pd.DataFrame
         self.detect_sales()
         self.detect_edpl()
+
 
     def detect_sales(self):
         self.sales = self.df.copy()
@@ -21,15 +24,15 @@ class DetectSegments:
         for i in self.sales.columns:
             for j in self.sales.index.values[self.window:]:
                 self.sales.loc[j, i] = self.sales.loc[j, i] if self.sales.loc[j, i] > self.threshold * \
-                                                               np.max(self.sales.loc[j - 60:j, i]) or sales_copy.loc[
+                                                    np.max(self.sales.loc[j - self.window:j, i]) or sales_copy.loc[
                                                                    j, i] > \
-                                                               sales_copy.loc[j - 1, i] / 0.85 else self.sales.loc[
+                                                    sales_copy.loc[j - 1, i] / self.threshold_out else self.sales.loc[
                                                                 j - 1, i]
 
         self.sales = (self.sales * self.threshold > self.df)
-        self.sales = (self.sales.rolling(window=5).sum() == 5)
+        self.sales = (self.sales.rolling(window=self.sales_period).sum() == self.sales_period)
         out_df = self.sales.copy()
-        for i in range(1, 5):
+        for i in range(1, self.sales_period):
             new_index = self.sales.index[:-i]
             new_df = self.sales.copy()[i:]
             new_df.index = new_index
