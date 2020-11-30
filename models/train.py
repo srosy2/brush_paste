@@ -8,14 +8,14 @@ from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 import wandb
 import warnings
+import pickle
 
 warnings.filterwarnings("ignore")
 
-"""
-I use bayesian optimization for training models, ..._pounds to set range of optimization parameters,
-ML Flow for model tracking.
-Use f1_score for model optimization 
-"""
+"""I use bayesian optimization for training models, ..._pounds to set range of optimization parameters, ML Flow for 
+model tracking. Use f1_score for model optimization log our training in W&B that you can find by link 
+https://wandb.ai/srosy/runs-from-for-loop/reports/Train-models--VmlldzoyOTM3NTc?accessToken
+=ihj25h8cbahws7ix95xab8ehvrj4zblnglgama96b8aen3qptv0hs28epgp0t0dc """
 
 
 class Trainer:
@@ -54,9 +54,10 @@ class Trainer:
         lb = LabelEncoder()
         lb.fit(self.target)
         self.target = pd.Series(lb.transform(self.target)).replace({0: 1, 1: 0})
+        with open('test/encoder.pickle', 'wb') as place:
+            pickle.dump(lb, place)
 
     def train_model(self):
-
         """"
         LGBMClassifier, XGBClassifier, CatBoostClassifier is optimized by using BayesianOptimization
 
@@ -88,6 +89,13 @@ class Trainer:
         optimizer_xgb.maximize(n_iter=500)
         optimizer_lgbm.maximize(n_iter=500)
         optimizer_cat.maximize(n_iter=500)
+        train_models = sorted([[optimizer_xgb.max, self.xgb(**optimizer_xgb.max['params'])], [optimizer_lgbm.max,
+                               self.lgbm(**optimizer_lgbm.max['params'])], [optimizer_cat.max,
+                               self.cat(**optimizer_cat.max['params'])]], key=lambda x: x[0]['target'], reverse=True)
+        model = train_models[0][1].fit(self.data, self.target)
+        with open('test/model.pickle', 'wb') as place:
+            pickle.dump(model, place)
+
 
     def log_par_and_metrics(self, params, metric, name):
         run = wandb.init(project="runs-from-for-loop", reinit=True)

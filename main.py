@@ -5,7 +5,7 @@ from model import Model
 from predict import PredictTarget
 
 
-def prepare_monthly_data(link):
+def prepare_monthly_data(link: str):  # use for detect In-out/AM
     data = pd.read_csv(link)  # load monthly data
     preprocess = PreprocessMonthlyData(data)  # delete all unnecessary features and create new features
     new_data = CreateNewData(preprocess.df)  # Create new data for prediction
@@ -16,10 +16,10 @@ def prepare_monthly_data(link):
     return pd.concat((new_data.new_df, prediction.target), axis=1)
 
 
-def prepare_daily_data(link):
-    data = pd.read_csv(link)
-    prep_models = PreprocessDailyData(data)
-    nielsen = DetectSegments(prep_models.table, 60, 0.9, 60, 5, 0.85)
+def prepare_daily_data(link: str):  # use for detect sales periods
+    data = pd.read_csv(link)    # load daily data
+    prep_models = PreprocessDailyData(data)   # preprocess daily data
+    nielsen = DetectSegments(prep_models.table, 60, 0.9, 60, 5, 0.85)   # detect sales
     data['Скидка'] = data['Формат'] + '_' + data['SKU']
     data['Скидка'] = data['Скидка'] + '_' + pd.to_datetime(data['День']).apply(
         lambda x: str(x.week * 7 + x.weekday()))
@@ -32,7 +32,8 @@ def prepare_daily_data(link):
 if __name__ == '__main__':
     Am_In_out = prepare_monthly_data('Data/test/MonthlyDataset.csv')
     daily_data = prepare_daily_data('Data/test/DailyDataset.csv')
-    the_same_index = list(set(daily_data['In-out/Am']) - set(Am_In_out.index.values))
+    the_same_index = list(set(daily_data['In-out/Am']) - set(Am_In_out.index.values))  # find index that we have in
+    # daily data and monthly data
     daily_data = daily_data[daily_data['In-out/Am'].apply(
         lambda x: not (x in the_same_index))]
     daily_data['In-out/Am'] = daily_data['In-out/Am'].apply(lambda x: Am_In_out['predict'].loc[x])
