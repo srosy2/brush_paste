@@ -57,7 +57,7 @@ class PreprocessMonthlyData:
         self.df = self.df.rename(columns={'Format_SKU': 'цена', 'цена': 'Format_SKU'})
 
     def drop_unnec_col(self):  # drop useless features
-        unnecessary: List[str] = ['Brand', 'Категория', 'Формат', 'SKU']
+        unnecessary: List[str] = ['Brand', 'Формат', 'SKU']
         self.df = self.df.drop(unnecessary, axis=1)
 
 

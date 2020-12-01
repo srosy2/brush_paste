@@ -32,9 +32,5 @@ def prepare_daily_data(link: str):  # use for detect sales periods
 if __name__ == '__main__':
     Am_In_out = prepare_monthly_data('Data/test/MonthlyDataset.csv')
     daily_data = prepare_daily_data('Data/test/DailyDataset.csv')
-    the_same_index = list(set(daily_data['In-out/Am']) - set(Am_In_out.index.values))  # find index that we have in
-    # daily data and monthly data
-    daily_data = daily_data[daily_data['In-out/Am'].apply(
-        lambda x: not (x in the_same_index))]
     daily_data['In-out/Am'] = daily_data['In-out/Am'].apply(lambda x: Am_In_out['predict'].loc[x])
     daily_data.to_excel('update.xlsx', index=False)
